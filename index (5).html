@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Petualangan Arsyila — Tempat Imajinasi Anak Berpetualang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Caveat:wght@500;700&family=Patrick+Hand&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --sky-dawn:#ffd6a5;
+    --sky-morning:#a0c4ff;
+    --sky-day:#7cc4e8;
+    --mountain:#6a4c93;
+    --forest-dark:#2d5016;
+    --forest-light:#52b788;
+    --sea:#0077b6;
+    --sea-deep:#023e8a;
+    --space:#10002b;
+    --space-purple:#240046;
+    --sun:#ffb703;
+    --star:#fff1a8;
+    --paper:#fff8e7;
+    --ink:#2b2d42;
+    --accent:#ef476f;
+    --accent-2:#ffd166;
+    --accent-3:#06d6a0;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Fredoka', sans-serif;
+    color:var(--ink);
+    background:var(--sky-morning);
+    overflow-x:hidden;
+  }
+
+  /* ===== NAVIGATION — hand-drawn sticky nav ===== */
+  nav.topbar{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 32px;
+    background:rgba(255,248,231,.92);
+    backdrop-filter:blur(8px);
+    border-bottom:3px dashed var(--ink);
+  }
+  .logo{
+    font-family:'Caveat', cursive;
+    font-size:28px; font-weight:700;
+    display:flex; align-items:center; gap:10px;
+    color:var(--accent);
+  }
+  .logo-icon{
+    width:36px;height:36px;
+    background:var(--accent-2);
+    border:2.5px solid var(--ink);
+    border-radius:50%;
+    display:grid;place-items:center;
+    transform:rotate(-8deg);
+    box-shadow:3px 3px 0 var(--ink);
+    font-size:20px;
+  }
+  .nav-links{display:flex;gap:6px;align-items:center;}
+  .nav-links a{
+    font-family:'Patrick Hand', cursive;
+    font-size:18px;
+    text-decoration:none; color:var(--ink);
+    padding:8px 16px; border-radius:24px;
+    transition:all .2s ease;
+  }
+  .nav-links a:hover{background:var(--accent-2);transform:rotate(-2deg);}
+  .btn-write{
+    background:var(--accent); color:var(--paper);
+    border:2.5px solid var(--ink);
+    padding:10px 20px;
+    font-family:'Fredoka', sans-serif; font-weight:600;
+    border-radius:30px;
+    box-shadow:4px 4px 0 var(--ink);
+    cursor:pointer; text-decoration:none;
+    transition:transform .15s ease, box-shadow .15s ease;
+    font-size:15px;
+  }
+  .btn-write:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink);}
+  .btn-write:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink);}
+
+  /* ===== HERO — dawn scene ===== */
+  .scene{
+    position:relative; width:100%; min-height:100vh;
+    overflow:hidden;
+  }
+  #scene-hero{
+    background:linear-gradient(180deg, var(--sky-dawn) 0%, #ffb4a2 60%, var(--sky-morning) 100%);
+    display:flex; align-items:center; justify-content:center;
+    padding:100px 20px 0;
+  }
+  .hero-inner{
+    position:relative; z-index:5;
+    text-align:center; max-width:820px;
+  }
+  .hero-title{
+    font-family:'Caveat', cursive;
+    font-size:clamp(56px, 10vw, 130px);
+    font-weight:700;
+    line-height:1;
+    color:var(--paper);
+    text-shadow:
+      5px 5px 0 var(--ink),
+      -2px -2px 0 var(--accent);
+    transform:rotate(-2deg);
+  }
+  .hero-title .word-2{
+    color:var(--accent-2);
+    display:inline-block;
+    transform:rotate(3deg) translateY(8px);
+  }
+  .hero-sub{
+    margin-top:24px;
+    font-family:'Patrick Hand', cursive;
+    font-size:clamp(20px, 2.4vw, 28px);
+    color:var(--ink);
+    background:var(--paper);
+    display:inline-block;
+    padding:12px 28px;
+    border:3px solid var(--ink);
+    border-radius:40px;
+    box-shadow:5px 5px 0 var(--ink);
+    transform:rotate(1deg);
+  }
+  .hero-cta{
+    margin-top:40px; display:flex; gap:18px; justify-content:center; flex-wrap:wrap;
+  }
+  .btn-big{
+    font-family:'Fredoka', sans-serif; font-weight:600;
+    font-size:18px;
+    padding:16px 32px;
+    border:3px solid var(--ink);
+    border-radius:40px;
+    cursor:pointer; text-decoration:none;
+    box-shadow:6px 6px 0 var(--ink);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-big:hover{transform:translate(-3px,-3px);box-shadow:9px 9px 0 var(--ink);}
+  .btn-big.primary{background:var(--accent);color:var(--paper);}
+  .btn-big.secondary{background:var(--accent-3);color:var(--ink);}
+
+  /* Hero decor */
+  .hero-sun{
+    position:absolute; top:12%; right:8%;
+    width:140px; height:140px;
+    background:var(--sun);
+    border:4px solid var(--ink);
+    border-radius:50%;
+    box-shadow:6px 6px 0 var(--ink);
+    animation:bob 4s ease-in-out infinite;
+  }
+  .hero-sun::before{
+    content:""; position:absolute; inset:25px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #fff2b0, transparent 60%);
+  }
+  .cloud{
+    position:absolute;
+    background:var(--paper);
+    border:3px solid var(--ink);
+    border-radius:50px;
+    box-shadow:4px 4px 0 rgba(0,0,0,.15);
+  }
+  .cloud-1{top:18%; left:8%; width:110px; height:45px; animation:drift 15s linear infinite;}
+  .cloud-2{top:30%; left:65%; width:90px; height:38px; animation:drift 20s linear infinite reverse;}
+  .cloud-3{top:55%; left:15%; width:70px; height:30px; animation:drift 18s linear infinite;}
+
+  /* Arsyila character */
+  .arsyila{
+    position:absolute; bottom:12%; left:50%;
+    transform:translateX(-50%);
+    width:120px; z-index:6;
+    animation:bounce 1.8s ease-in-out infinite;
+  }
+
+  /* Scroll hint */
+  .scroll-hint{
+    position:absolute; bottom:30px; left:50%;
+    transform:translateX(-50%);
+    font-family:'Caveat', cursive; font-size:22px;
+    color:var(--ink);
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    animation:bob 2s ease-in-out infinite;
+  }
+  .scroll-hint-arrow{
+    width:22px; height:22px;
+    border-right:3px solid var(--ink);
+    border-bottom:3px solid var(--ink);
+    transform:rotate(45deg);
+  }
+
+  /* ===== FOREST SCENE ===== */
+  #scene-forest{
+    background:linear-gradient(180deg, var(--sky-morning) 0%, #b5ead7 40%, var(--forest-light) 100%);
+    padding:120px 20px;
+  }
+  .forest-trees{
+    position:absolute; inset:0; pointer-events:none;
+  }
+  .tree{
+    position:absolute; bottom:0;
+    transform:translateY(30px);
+    opacity:0;
+    transition:transform .8s cubic-bezier(.34,1.56,.64,1), opacity .8s ease;
+  }
+  .tree.in{transform:translateY(0); opacity:1;}
+  .scene-text{
+    position:relative; z-index:5;
+    max-width:620px; margin:0 auto;
+    background:var(--paper);
+    padding:36px 40px;
+    border:3px solid var(--ink);
+    border-radius:24px;
+    box-shadow:8px 8px 0 var(--ink);
+    transform:rotate(-1deg);
+  }
+  .scene-text h2{
+    font-family:'Caveat', cursive;
+    font-size:clamp(40px, 6vw, 68px);
+    color:var(--accent);
+    line-height:1;
+    margin-bottom:14px;
+  }
+  .scene-text p{
+    font-family:'Patrick Hand', cursive;
+    font-size:20px; line-height:1.5;
+  }
+
+  /* ===== MOUNTAIN ===== */
+  #scene-mountain{
+    background:linear-gradient(180deg, var(--forest-light) 0%, #8ecae6 35%, #a896d1 100%);
+    padding:120px 20px;
+  }
+  .mountain-shape{
+    position:absolute; bottom:0;
+    width:100%; height:60%;
+    opacity:0;
+    transform:translateY(40px);
+    transition:transform 1s cubic-bezier(.34,1.56,.64,1), opacity 1s ease;
+  }
+  .mountain-shape.in{opacity:1;transform:translateY(0);}
+
+  /* ===== SEA ===== */
+  #scene-sea{
+    background:linear-gradient(180deg, #a896d1 0%, #4a90b8 30%, var(--sea) 70%, var(--sea-deep) 100%);
+    padding:120px 20px;
+  }
+  .wave{
+    position:absolute; left:0; right:0;
+    height:80px;
+    opacity:0;
+    transition:opacity .8s ease;
+  }
+  .wave.in{opacity:1;}
+  .fish{
+    position:absolute;
+    animation:swim 8s ease-in-out infinite;
+  }
+
+  /* ===== SPACE ===== */
+  #scene-space{
+    background:linear-gradient(180deg, var(--sea-deep) 0%, var(--space-purple) 40%, var(--space) 100%);
+    padding:120px 20px;
+    color:var(--paper);
+  }
+  #scene-space .scene-text{
+    background:var(--space-purple);
+    border-color:var(--accent-2);
+    color:var(--paper);
+    box-shadow:8px 8px 0 var(--accent-2);
+  }
+  #scene-space .scene-text h2{color:var(--accent-2);}
+  .star{
+    position:absolute;
+    width:4px;height:4px;
+    background:var(--star);
+    border-radius:50%;
+    box-shadow:0 0 8px var(--star);
+    animation:twinkle 2s ease-in-out infinite;
+  }
+  .planet{
+    position:absolute;
+    border-radius:50%;
+    border:3px solid var(--ink);
+    box-shadow:inset -8px -8px 0 rgba(0,0,0,.2), 4px 4px 0 rgba(0,0,0,.3);
+    opacity:0;
+    transform:scale(.5);
+    transition:transform 1s cubic-bezier(.34,1.56,.64,1), opacity 1s ease;
+  }
+  .planet.in{opacity:1; transform:scale(1);}
+  .rocket{
+    position:absolute;
+    animation:rocketFloat 4s ease-in-out infinite;
+  }
+
+  /* ===== BLOG / STORIES ===== */
+  #scene-stories{
+    background:
+      radial-gradient(circle at 20% 20%, #ffd6a5 0, transparent 40%),
+      radial-gradient(circle at 80% 70%, #caffbf 0, transparent 40%),
+      var(--paper);
+    padding:100px 20px;
+    background-attachment:fixed;
+  }
+  .stories-header{
+    text-align:center; max-width:720px; margin:0 auto 50px;
+  }
+  .stories-header h2{
+    font-family:'Caveat', cursive;
+    font-size:clamp(48px, 8vw, 88px);
+    color:var(--ink);
+    line-height:1;
+  }
+  .stories-header h2 span{color:var(--accent);}
+  .stories-header p{
+    font-family:'Patrick Hand', cursive;
+    font-size:22px; margin-top:12px;
+  }
+
+  .stories-grid{
+    max-width:1100px; margin:0 auto;
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+    gap:28px;
+  }
+  .story-card{
+    background:var(--paper);
+    border:3px solid var(--ink);
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:6px 6px 0 var(--ink);
+    transition:transform .2s ease, box-shadow .2s ease;
+    cursor:pointer;
+    display:flex; flex-direction:column;
+    opacity:0; transform:translateY(40px);
+    transition:transform .6s cubic-bezier(.34,1.56,.64,1), opacity .6s ease, box-shadow .2s ease;
+  }
+  .story-card.in{opacity:1; transform:translateY(0);}
+  .story-card:hover{
+    transform:translateY(-6px) rotate(-1deg);
+    box-shadow:10px 10px 0 var(--ink);
+  }
+  .story-card:nth-child(even){transform:rotate(1deg);}
+  .story-card:nth-child(even).in{transform:rotate(1deg) translateY(0);}
+  .story-card:nth-child(even):hover{transform:translateY(-6px) rotate(2deg);}
+
+  .story-image{
+    height:180px;
+    display:grid; place-items:center;
+    font-size:80px;
+    border-bottom:3px solid var(--ink);
+  }
+  .story-image.bg-1{background:linear-gradient(135deg,#ffd6a5,#ef476f);}
+  .story-image.bg-2{background:linear-gradient(135deg,#a0c4ff,#06d6a0);}
+  .story-image.bg-3{background:linear-gradient(135deg,#ffd166,#ef476f);}
+  .story-image.bg-4{background:linear-gradient(135deg,#b5ead7,#0077b6);}
+  .story-image.bg-5{background:linear-gradient(135deg,#cdb4db,#240046);}
+  .story-image.bg-6{background:linear-gradient(135deg,#ffafcc,#ffd166);}
+
+  .story-body{
+    padding:20px 22px; flex:1;
+    display:flex; flex-direction:column;
+  }
+  .story-tag{
+    display:inline-block;
+    font-family:'Patrick Hand', cursive;
+    font-size:13px;
+    background:var(--accent-2);
+    border:2px solid var(--ink);
+    border-radius:20px;
+    padding:3px 12px;
+    margin-bottom:10px;
+    align-self:flex-start;
+  }
+  .story-title{
+    font-family:'Caveat', cursive;
+    font-size:30px; line-height:1;
+    color:var(--ink);
+    margin-bottom:8px;
+  }
+  .story-excerpt{
+    font-family:'Patrick Hand', cursive;
+    font-size:16px; line-height:1.4;
+    color:#555;
+    flex:1;
+  }
+  .story-meta{
+    margin-top:14px;
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'Patrick Hand', cursive;
+    font-size:14px; color:#777;
+  }
+  .story-author{display:flex;align-items:center;gap:8px;}
+  .avatar{
+    width:28px;height:28px;border-radius:50%;
+    border:2px solid var(--ink);
+    display:grid;place-items:center;
+    font-size:14px;
+  }
+
+  /* ===== CTA FINAL ===== */
+  #scene-cta{
+    background:linear-gradient(180deg, var(--paper) 0%, #ffd6a5 100%);
+    padding:100px 20px;
+    text-align:center;
+    position:relative;
+  }
+  #scene-cta h2{
+    font-family:'Caveat', cursive;
+    font-size:clamp(48px, 8vw, 90px);
+    color:var(--accent);
+    line-height:1;
+  }
+  #scene-cta p{
+    font-family:'Patrick Hand', cursive;
+    font-size:22px; margin:16px auto 30px; max-width:500px;
+  }
+
+  /* ===== FOOTER ===== */
+  footer{
+    background:var(--ink); color:var(--paper);
+    padding:40px 20px 30px;
+    text-align:center;
+    font-family:'Patrick Hand', cursive;
+  }
+  footer .heart{color:var(--accent);display:inline-block;animation:bob 1.2s ease-in-out infinite;}
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes bob{
+    0%,100%{transform:translateY(0);}
+    50%{transform:translateY(-10px);}
+  }
+  @keyframes bounce{
+    0%,100%{transform:translateX(-50%) translateY(0);}
+    50%{transform:translateX(-50%) translateY(-14px);}
+  }
+  @keyframes drift{
+    from{transform:translateX(0);}
+    to{transform:translateX(100vw);}
+  }
+  @keyframes twinkle{
+    0%,100%{opacity:.4;transform:scale(1);}
+    50%{opacity:1;transform:scale(1.4);}
+  }
+  @keyframes swim{
+    0%,100%{transform:translateX(0) rotate(0);}
+    50%{transform:translateX(30px) rotate(6deg);}
+  }
+  @keyframes rocketFloat{
+    0%,100%{transform:translateY(0) rotate(-10deg);}
+    50%{transform:translateY(-20px) rotate(-6deg);}
+  }
+
+  /* Mobile */
+  @media (max-width:720px){
+    nav.topbar{padding:12px 16px;}
+    .nav-links a{display:none;}
+    .nav-links a.mobile-show{display:inline-block;}
+    .hero-sun{width:90px;height:90px;top:15%;right:5%;}
+    .scene-text{padding:26px 24px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="topbar">
+  <a href="#top" class="logo">
+    <span class="logo-icon">✨</span>
+    <span>Petualangan Arsyila</span>
+  </a>
+  <div class="nav-links">
+    <a href="#scene-stories" class="mobile-show">Cerita</a>
+    <a href="#scene-forest">Hutan</a>
+    <a href="#scene-sea">Laut</a>
+    <a href="#scene-space">Angkasa</a>
+    <a href="tulis.html" class="btn-write">✏️ Tulis Cerita</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="scene" id="scene-hero">
+  <div class="hero-sun"></div>
+  <div class="cloud cloud-1"></div>
+  <div class="cloud cloud-2"></div>
+  <div class="cloud cloud-3"></div>
+
+  <div class="hero-inner">
+    <h1 class="hero-title">
+      <span class="word-1">Petualangan</span>
+      <span class="word-2">Arsyila</span>
+    </h1>
+    <div class="hero-sub">Tempat seru untuk anak-anak menuangkan imajinasi lewat tulisan & gambar 🎨</div>
+    <div class="hero-cta">
+      <a href="tulis.html" class="btn-big primary">✏️ Mulai Menulis</a>
+      <a href="#scene-stories" class="btn-big secondary">📖 Baca Cerita</a>
+    </div>
+  </div>
+
+  <!-- Arsyila character -->
+  <svg class="arsyila" viewBox="0 0 120 160" xmlns="http://www.w3.org/2000/svg">
+    <!-- body -->
+    <ellipse cx="60" cy="110" rx="32" ry="36" fill="#ef476f" stroke="#2b2d42" stroke-width="3"/>
+    <!-- legs -->
+    <rect x="44" y="135" width="12" height="22" rx="6" fill="#2b2d42"/>
+    <rect x="64" y="135" width="12" height="22" rx="6" fill="#2b2d42"/>
+    <!-- arms -->
+    <ellipse cx="28" cy="110" rx="8" ry="16" fill="#ffb4a2" stroke="#2b2d42" stroke-width="2.5" transform="rotate(-20 28 110)"/>
+    <ellipse cx="92" cy="110" rx="8" ry="16" fill="#ffb4a2" stroke="#2b2d42" stroke-width="2.5" transform="rotate(20 92 110)"/>
+    <!-- head -->
+    <circle cx="60" cy="55" r="32" fill="#ffb4a2" stroke="#2b2d42" stroke-width="3"/>
+    <!-- hair -->
+    <path d="M30,50 Q30,20 60,18 Q90,20 90,50 Q85,30 60,30 Q35,30 30,50 Z" fill="#2b2d42"/>
+    <!-- eyes -->
+    <circle cx="50" cy="56" r="4" fill="#2b2d42"/>
+    <circle cx="70" cy="56" r="4" fill="#2b2d42"/>
+    <circle cx="51" cy="54" r="1.5" fill="#fff"/>
+    <circle cx="71" cy="54" r="1.5" fill="#fff"/>
+    <!-- cheeks -->
+    <circle cx="44" cy="66" r="4" fill="#ef476f" opacity=".6"/>
+    <circle cx="76" cy="66" r="4" fill="#ef476f" opacity=".6"/>
+    <!-- smile -->
+    <path d="M52,70 Q60,76 68,70" fill="none" stroke="#2b2d42" stroke-width="2.5" stroke-linecap="round"/>
+  </svg>
+
+  <div class="scroll-hint">
+    <span>scroll ke bawah</span>
+    <div class="scroll-hint-arrow"></div>
+  </div>
+</section>
+
+<!-- FOREST SCENE -->
+<section class="scene" id="scene-forest">
+  <div class="forest-trees" aria-hidden="true">
+    <!-- Trees positioned across -->
+    <svg class="tree" style="left:3%; width:80px;" viewBox="0 0 80 140">
+      <rect x="32" y="80" width="16" height="60" fill="#6b4423" stroke="#2b2d42" stroke-width="3"/>
+      <circle cx="40" cy="60" r="40" fill="#52b788" stroke="#2b2d42" stroke-width="3"/>
+      <circle cx="25" cy="45" r="5" fill="#ef476f"/>
+      <circle cx="55" cy="55" r="5" fill="#ffd166"/>
+    </svg>
+    <svg class="tree" style="left:15%; width:100px;" viewBox="0 0 100 180">
+      <rect x="42" y="110" width="16" height="70" fill="#6b4423" stroke="#2b2d42" stroke-width="3"/>
+      <polygon points="50,10 90,90 10,90" fill="#2d6a4f" stroke="#2b2d42" stroke-width="3"/>
+      <polygon points="50,35 85,110 15,110" fill="#40916c" stroke="#2b2d42" stroke-width="3"/>
+    </svg>
+    <svg class="tree" style="right:10%; width:110px;" viewBox="0 0 110 180">
+      <rect x="47" y="110" width="16" height="70" fill="#6b4423" stroke="#2b2d42" stroke-width="3"/>
+      <circle cx="55" cy="70" r="50" fill="#52b788" stroke="#2b2d42" stroke-width="3"/>
+      <circle cx="35" cy="50" r="6" fill="#ef476f"/>
+      <circle cx="75" cy="85" r="6" fill="#ffd166"/>
+      <circle cx="55" cy="40" r="5" fill="#06d6a0"/>
+    </svg>
+    <svg class="tree" style="right:25%; width:70px;" viewBox="0 0 70 120">
+      <rect x="28" y="70" width="14" height="50" fill="#6b4423" stroke="#2b2d42" stroke-width="3"/>
+      <polygon points="35,8 62,75 8,75" fill="#40916c" stroke="#2b2d42" stroke-width="3"/>
+    </svg>
+    <!-- Birds -->
+    <svg style="position:absolute; top:20%; left:30%; width:30px;" viewBox="0 0 30 20">
+      <path d="M2,12 Q8,4 15,10 Q22,4 28,12" fill="none" stroke="#2b2d42" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <svg style="position:absolute; top:15%; left:55%; width:24px;" viewBox="0 0 30 20">
+      <path d="M2,12 Q8,4 15,10 Q22,4 28,12" fill="none" stroke="#2b2d42" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="scene-text">
+    <h2>Hutan Ajaib 🌳</h2>
+    <p>Di tengah hutan yang penuh pohon-pohon tinggi, Arsyila bertemu burung-burung yang bernyanyi. Setiap daun bercerita, setiap angin berbisik tentang petualangan baru. Apa yang akan kamu temukan di sini?</p>
+  </div>
+</section>
+
+<!-- MOUNTAIN SCENE -->
+<section class="scene" id="scene-mountain">
+  <svg class="mountain-shape" viewBox="0 0 1200 500" preserveAspectRatio="none">
+    <polygon points="0,500 200,200 400,350 600,100 800,300 1000,150 1200,400 1200,500" fill="#6a4c93" stroke="#2b2d42" stroke-width="3"/>
+    <polygon points="150,260 200,200 250,260" fill="#fff" opacity=".8"/>
+    <polygon points="570,160 600,100 630,160" fill="#fff" opacity=".8"/>
+    <polygon points="970,200 1000,150 1030,200" fill="#fff" opacity=".8"/>
+  </svg>
+  <div class="scene-text">
+    <h2>Puncak Gunung ⛰️</h2>
+    <p>Udara dingin, awan terasa dekat. Dari puncak gunung yang tinggi, Arsyila melihat dunia terbentang luas. Kalau kamu bisa terbang ke gunung mana pun, ke mana kamu akan pergi?</p>
+  </div>
+</section>
+
+<!-- SEA SCENE -->
+<section class="scene" id="scene-sea">
+  <svg class="wave" style="top:10%;" viewBox="0 0 1200 80" preserveAspectRatio="none">
+    <path d="M0,40 Q150,10 300,40 T600,40 T900,40 T1200,40 L1200,80 L0,80 Z" fill="#90e0ef" opacity=".6"/>
+  </svg>
+  <svg class="wave" style="top:30%;" viewBox="0 0 1200 80" preserveAspectRatio="none">
+    <path d="M0,40 Q150,70 300,40 T600,40 T900,40 T1200,40 L1200,80 L0,80 Z" fill="#48cae4" opacity=".5"/>
+  </svg>
+
+  <!-- Fish -->
+  <svg class="fish" style="top:60%; left:10%; width:60px;" viewBox="0 0 60 40">
+    <ellipse cx="25" cy="20" rx="20" ry="12" fill="#ffd166" stroke="#2b2d42" stroke-width="2.5"/>
+    <polygon points="45,20 58,8 58,32" fill="#ffd166" stroke="#2b2d42" stroke-width="2.5"/>
+    <circle cx="18" cy="17" r="3" fill="#2b2d42"/>
+    <circle cx="18.5" cy="16" r="1" fill="#fff"/>
+  </svg>
+  <svg class="fish" style="top:75%; right:15%; width:50px; animation-delay:-2s;" viewBox="0 0 60 40">
+    <ellipse cx="25" cy="20" rx="20" ry="12" fill="#ef476f" stroke="#2b2d42" stroke-width="2.5"/>
+    <polygon points="45,20 58,8 58,32" fill="#ef476f" stroke="#2b2d42" stroke-width="2.5"/>
+    <circle cx="18" cy="17" r="3" fill="#2b2d42"/>
+  </svg>
+  <svg class="fish" style="top:45%; left:55%; width:45px; animation-delay:-4s;" viewBox="0 0 60 40">
+    <ellipse cx="25" cy="20" rx="20" ry="12" fill="#06d6a0" stroke="#2b2d42" stroke-width="2.5"/>
+    <polygon points="45,20 58,8 58,32" fill="#06d6a0" stroke="#2b2d42" stroke-width="2.5"/>
+    <circle cx="18" cy="17" r="3" fill="#2b2d42"/>
+  </svg>
+  <!-- Bubbles -->
+  <div style="position:absolute;top:80%;left:20%;width:12px;height:12px;background:#caffbf;border:2px solid #2b2d42;border-radius:50%;animation:bob 3s ease-in-out infinite;"></div>
+  <div style="position:absolute;top:70%;left:40%;width:8px;height:8px;background:#caffbf;border:2px solid #2b2d42;border-radius:50%;animation:bob 2.5s ease-in-out infinite;"></div>
+
+  <div class="scene-text" style="transform:rotate(1deg);">
+    <h2>Lautan Dalam 🐠</h2>
+    <p>Ikan-ikan berwarna cerah berenang, gelembung-gelembung naik perlahan. Di dasar laut ada harta karun ajaib. Kalau kamu jadi ikan, kamu mau ikan warna apa?</p>
+  </div>
+</section>
+
+<!-- SPACE SCENE -->
+<section class="scene" id="scene-space">
+  <!-- Stars will be JS generated -->
+  <div id="stars-container"></div>
+
+  <!-- Planets -->
+  <div class="planet" style="top:15%; left:8%; width:80px; height:80px; background:#ef476f;"></div>
+  <div class="planet" style="top:25%; right:12%; width:110px; height:110px; background:#ffd166;">
+    <div style="position:absolute;top:45%;left:-20%;width:140%;height:10%;background:#f4a261;border:3px solid #2b2d42;border-radius:50%;transform:rotate(-15deg);"></div>
+  </div>
+  <div class="planet" style="bottom:20%; left:15%; width:60px; height:60px; background:#06d6a0;"></div>
+
+  <!-- Rocket -->
+  <svg class="rocket" style="top:50%; right:20%; width:80px;" viewBox="0 0 80 140">
+    <path d="M40,10 L60,50 L60,100 L20,100 L20,50 Z" fill="#ef476f" stroke="#2b2d42" stroke-width="3"/>
+    <circle cx="40" cy="60" r="10" fill="#a0c4ff" stroke="#2b2d42" stroke-width="3"/>
+    <polygon points="20,80 5,110 20,100" fill="#ffd166" stroke="#2b2d42" stroke-width="3"/>
+    <polygon points="60,80 75,110 60,100" fill="#ffd166" stroke="#2b2d42" stroke-width="3"/>
+    <path d="M30,100 L40,130 L50,100" fill="#ffb703" stroke="#2b2d42" stroke-width="3"/>
+  </svg>
+
+  <div class="scene-text">
+    <h2>Luar Angkasa 🚀</h2>
+    <p>Bintang-bintang berkedip, planet-planet berputar pelan. Arsyila naik roket menjelajah galaksi. Kalau kamu punya planet sendiri, apa namanya dan siapa yang tinggal di sana?</p>
+  </div>
+</section>
+
+<!-- STORIES BLOG SECTION -->
+<section class="scene" id="scene-stories" style="min-height:auto;">
+  <div class="stories-header">
+    <h2>Cerita dari <span>Teman-Teman</span> ✨</h2>
+    <p>Imajinasi tanpa batas dari para petualang kecil</p>
+  </div>
+
+  <div class="stories-grid" id="storiesGrid">
+    <!-- Rendered by JS from sample data -->
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="scene" id="scene-cta" style="min-height:auto;">
+  <h2>Siap Bikin Ceritamu? ✨</h2>
+  <p>Kertas kosong sudah menunggu. Tulis petualanganmu, gambar temanmu yang ajaib!</p>
+  <a href="tulis.html" class="btn-big primary">🚀 Mulai Petualanganku</a>
+</section>
+
+<footer>
+  <p>Petualangan Arsyila — dibuat dengan <span class="heart">❤</span> untuk anak-anak hebat</p>
+  <p style="opacity:.6;font-size:14px;margin-top:6px;">© 2026 · Tempat imajinasi berkembang</p>
+</footer>
+
+<script>
+  // ========== Intersection Observer for reveals ==========
+  const revealEls = document.querySelectorAll('.tree, .mountain-shape, .wave, .planet, .story-card');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach((entry, i)=>{
+      if(entry.isIntersecting){
+        // stagger the same-class siblings
+        setTimeout(()=> entry.target.classList.add('in'), i*80);
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold:0.2 });
+  revealEls.forEach(el=>io.observe(el));
+
+  // ========== Parallax scroll on hero sun & arsyila ==========
+  const sun = document.querySelector('.hero-sun');
+  const arsy = document.querySelector('.arsyila');
+  const clouds = document.querySelectorAll('.cloud');
+  window.addEventListener('scroll', ()=>{
+    const y = window.scrollY;
+    if(y < 1000){
+      if(sun) sun.style.transform = `translateY(${y*0.4}px) rotate(${y*0.2}deg)`;
+      if(arsy) arsy.style.bottom = `${12 - y*0.015}%`;
+      clouds.forEach((c,i)=>{
+        c.style.transform = `translateX(${y*0.3*(i+1)}px)`;
+      });
+    }
+  }, { passive:true });
+
+  // ========== Stars in space scene ==========
+  const starsContainer = document.getElementById('stars-container');
+  if(starsContainer){
+    for(let i=0; i<60; i++){
+      const s = document.createElement('div');
+      s.className = 'star';
+      s.style.left = Math.random()*100 + '%';
+      s.style.top = Math.random()*100 + '%';
+      s.style.animationDelay = Math.random()*2 + 's';
+      s.style.width = s.style.height = (2 + Math.random()*4) + 'px';
+      starsContainer.appendChild(s);
+    }
+  }
+
+  // ========== Blog stories (dummy data + localStorage) ==========
+  const sampleStories = [
+    { icon:'🦕', bg:'bg-1', tag:'Petualangan', title:'Dino yang Suka Kue', excerpt:'Di suatu hari yang cerah, Rex si dinosaurus kecil menemukan toko kue rahasia di tengah hutan...', author:'Nadia', age:8 },
+    { icon:'🧚', bg:'bg-2', tag:'Fantasi', title:'Peri Bulan', excerpt:'Setiap malam, Peri Bulan turun ke taman untuk menyiram bunga-bunga dengan cahaya perak...', author:'Raffi', age:9 },
+    { icon:'🐉', bg:'bg-3', tag:'Dongeng', title:'Naga Pemalu', excerpt:'Naga kecil bernama Api tidak suka meniupkan api. Dia lebih suka menghangatkan cokelat panas...', author:'Sasha', age:7 },
+    { icon:'🐙', bg:'bg-4', tag:'Laut', title:'Gurita 8 Teman', excerpt:'Ollie si gurita punya 8 tangan tapi belum punya teman. Hari ini dia mau cari 8 teman baru!', author:'Bima', age:8 },
+    { icon:'👽', bg:'bg-5', tag:'Luar Angkasa', title:'Tamu dari Mars', excerpt:'Zorp dari Mars nyasar ke Bumi. Dia bingung kenapa manusia punya dua mata, dia punya empat...', author:'Lila', age:10 },
+    { icon:'🦄', bg:'bg-6', tag:'Ajaib', title:'Unicorn Pelangi', excerpt:'Lulu si unicorn bisa bikin pelangi keluar dari tanduknya. Tapi hari ini pelanginya hitam putih...', author:'Aira', age:7 },
+  ];
+
+  // Merge with localStorage-saved stories
+  let saved = [];
+  try{
+    saved = JSON.parse(localStorage.getItem('arsyila_stories') || '[]');
+  }catch(e){ saved = []; }
+
+  const allStories = [...saved, ...sampleStories];
+  const grid = document.getElementById('storiesGrid');
+  allStories.forEach(s=>{
+    const card = document.createElement('article');
+    card.className = 'story-card';
+    card.innerHTML = `
+      <div class="story-image ${s.bg || 'bg-1'}">${s.icon || '📖'}</div>
+      <div class="story-body">
+        <span class="story-tag">${s.tag || 'Cerita'}</span>
+        <h3 class="story-title">${s.title}</h3>
+        <p class="story-excerpt">${s.excerpt}</p>
+        <div class="story-meta">
+          <div class="story-author">
+            <div class="avatar" style="background:${randomColor()};">${(s.author||'?')[0]}</div>
+            <span>${s.author}${s.age?`, ${s.age} thn`:''}</span>
+          </div>
+          <span>${s.date || 'baru saja'}</span>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+    io.observe(card);
+  });
+
+  function randomColor(){
+    const colors = ['#ffd166','#ef476f','#06d6a0','#a0c4ff','#caffbf','#ffafcc'];
+    return colors[Math.floor(Math.random()*colors.length)];
+  }
+</script>
+
+</body>
+</html>
