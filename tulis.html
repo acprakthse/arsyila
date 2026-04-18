@@ -626,7 +626,37 @@
 
 <div class="toast" id="toast">Berhasil!</div>
 
-<script>
+<!-- Loading overlay saat upload -->
+<div id="uploadOverlay" style="display:none; position:fixed; inset:0; background:rgba(43,45,66,.85); z-index:500; align-items:center; justify-content:center; flex-direction:column; gap:16px;">
+  <div style="font-size:80px; animation:spin 1.4s linear infinite;">🚀</div>
+  <div style="font-family:'Caveat',cursive; font-size:34px; color:var(--paper);">Mengirim ceritamu...</div>
+  <div style="font-family:'Patrick Hand',cursive; font-size:18px; color:var(--accent-2);" id="uploadStatus">Menyiapkan gambar</div>
+</div>
+
+<script type="module">
+  // ========== FIREBASE SETUP ==========
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+  import {
+    getFirestore, collection, addDoc, serverTimestamp
+  } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+  import {
+    getStorage, ref, uploadString, getDownloadURL
+  } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
+  import { firebaseConfig, DEMO_MODE } from './firebase-config.js';
+
+  let db = null, storage = null;
+  if (!DEMO_MODE) {
+    try {
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      storage = getStorage(app);
+    } catch (e) {
+      console.warn('Firebase init gagal, fallback ke localStorage:', e);
+    }
+  } else {
+    console.info('🟡 DEMO MODE aktif — Firebase belum dikonfigurasi. Data disimpan di localStorage.');
+  }
+
   // ========== STATE ==========
   const state = {
     icon: '📖',
@@ -887,26 +917,111 @@
     showToast('Gambarmu diunduh! 🎨');
   });
 
-  // Publish
-  document.getElementById('btnPublish').addEventListener('click', ()=>{
+  // Upload helper
+  function showUploadOverlay(status){
+    document.getElementById('uploadOverlay').style.display = 'flex';
+    document.getElementById('uploadStatus').textContent = status;
+  }
+  function updateUploadStatus(status){
+    document.getElementById('uploadStatus').textContent = status;
+  }
+  function hideUploadOverlay(){
+    document.getElementById('uploadOverlay').style.display = 'none';
+  }
+
+  // Publish — kirim ke Firebase (atau localStorage kalau demo mode)
+  document.getElementById('btnPublish').addEventListener('click', async ()=>{
     const story = buildStory(false);
     if(!story) return;
 
-    try{
-      const existing = JSON.parse(localStorage.getItem('arsyila_stories') || '[]');
-      existing.unshift(story);
-      localStorage.setItem('arsyila_stories', JSON.stringify(existing));
-      localStorage.removeItem('arsyila_draft');
+    const publishBtn = document.getElementById('btnPublish');
+    publishBtn.disabled = true;
+    publishBtn.style.opacity = '.6';
 
-      // fun celebratory overlay
-      celebrate();
-      setTimeout(()=>{
-        window.location.href = 'index.html#scene-stories';
-      }, 1800);
-    }catch(e){
-      showToast('Gagal menerbitkan. Coba lagi ya!', 'var(--accent)');
+    try {
+      if (db && storage) {
+        // ===== FIREBASE PATH =====
+        showUploadOverlay('Mengunggah gambarmu ke awan ☁️');
+
+        // 1. Upload canvas PNG ke Storage
+        const imageId = 'story_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+        const imgRef = ref(storage, `drawings/${imageId}.png`);
+        const dataUrl = canvas.toDataURL('image/png');
+        await uploadString(imgRef, dataUrl, 'data_url');
+        const drawingUrl = await getDownloadURL(imgRef);
+
+        updateUploadStatus('Menyimpan ceritamu 📝');
+
+        // 2. Simpan metadata ke Firestore (approved=false, tunggu parent)
+        await addDoc(collection(db, 'stories'), {
+          author: story.author,
+          age: story.age ? Number(story.age) : null,
+          title: story.title,
+          content: story.content,
+          excerpt: story.excerpt,
+          icon: story.icon,
+          tag: story.tag,
+          bg: story.bg,
+          drawingUrl,
+          drawingPath: `drawings/${imageId}.png`,
+          approved: false,  // PENTING: butuh review parent
+          createdAt: serverTimestamp()
+        });
+
+        localStorage.removeItem('arsyila_draft');
+        hideUploadOverlay();
+
+        // Tampilkan pesan khusus — cerita belum tayang langsung
+        showPendingModal();
+
+      } else {
+        // ===== FALLBACK LOCALSTORAGE (demo mode) =====
+        const existing = JSON.parse(localStorage.getItem('arsyila_stories') || '[]');
+        existing.unshift(story);
+        localStorage.setItem('arsyila_stories', JSON.stringify(existing));
+        localStorage.removeItem('arsyila_draft');
+        celebrate();
+        setTimeout(()=> window.location.href = 'index.html#scene-stories', 1800);
+      }
+    } catch (e) {
+      console.error(e);
+      hideUploadOverlay();
+      showToast('Oops, gagal mengirim. Coba lagi ya! ' + (e.message || ''), 'var(--accent)');
+      publishBtn.disabled = false;
+      publishBtn.style.opacity = '1';
     }
   });
+
+  // Modal pending — jelaskan cerita sedang menunggu review
+  function showPendingModal(){
+    const m = document.createElement('div');
+    m.style.cssText = `position:fixed; inset:0; background:rgba(43,45,66,.75); z-index:600;
+      display:flex; align-items:center; justify-content:center; padding:20px;
+      animation:fadeIn .3s ease;`;
+    m.innerHTML = `
+      <style>
+        @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+        @keyframes popIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+      </style>
+      <div style="background:var(--paper); border:3px solid var(--ink);
+                  border-radius:24px; padding:40px 36px; max-width:480px; text-align:center;
+                  box-shadow:10px 10px 0 var(--accent); animation:popIn .4s cubic-bezier(.34,1.56,.64,1);">
+        <div style="font-size:80px; margin-bottom:16px;">🎉</div>
+        <h2 style="font-family:'Caveat',cursive; font-size:48px; color:var(--accent); line-height:1;">Ceritamu Terkirim!</h2>
+        <p style="font-family:'Patrick Hand',cursive; font-size:19px; margin:16px 0; line-height:1.4;">
+          Hebat banget! Ceritamu sudah sampai di rak Ayah/Bunda ✨<br>
+          Nanti kalau sudah dibaca dan disetujui, ceritamu akan muncul di halaman utama untuk dibaca semua teman! 📖
+        </p>
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:24px;">
+          <button id="modalNew" class="btn btn-secondary" style="padding:12px 22px; font-size:16px;">✏️ Tulis Lagi</button>
+          <button id="modalHome" class="btn btn-primary" style="padding:12px 22px; font-size:16px;">🏠 Ke Halaman Utama</button>
+        </div>
+      </div>`;
+    document.body.appendChild(m);
+    celebrate();
+    document.getElementById('modalNew').onclick = ()=> window.location.reload();
+    document.getElementById('modalHome').onclick = ()=> window.location.href = 'index.html';
+  }
 
   // Celebratory confetti
   function celebrate(){

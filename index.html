@@ -672,10 +672,10 @@
 
 <footer>
   <p>Petualangan Arsyila — dibuat dengan <span class="heart">❤</span> untuk anak-anak hebat</p>
-  <p style="opacity:.6;font-size:14px;margin-top:6px;">© 2026 · Tempat imajinasi berkembang</p>
+  <p style="opacity:.6;font-size:14px;margin-top:6px;">© 2026 · Tempat imajinasi berkembang · <a href="admin.html" style="color:var(--accent-2);text-decoration:none;opacity:.7;">panel orang tua</a></p>
 </footer>
 
-<script>
+<script type="module">
   // ========== Intersection Observer for reveals ==========
   const revealEls = document.querySelectorAll('.tree, .mountain-shape, .wave, .planet, .story-card');
   const io = new IntersectionObserver((entries)=>{
@@ -718,7 +718,7 @@
     }
   }
 
-  // ========== Blog stories (dummy data + localStorage) ==========
+  // ========== Blog stories — Firebase + fallback ==========
   const sampleStories = [
     { icon:'🦕', bg:'bg-1', tag:'Petualangan', title:'Dino yang Suka Kue', excerpt:'Di suatu hari yang cerah, Rex si dinosaurus kecil menemukan toko kue rahasia di tengah hutan...', author:'Nadia', age:8 },
     { icon:'🧚', bg:'bg-2', tag:'Fantasi', title:'Peri Bulan', excerpt:'Setiap malam, Peri Bulan turun ke taman untuk menyiram bunga-bunga dengan cahaya perak...', author:'Raffi', age:9 },
@@ -728,19 +728,31 @@
     { icon:'🦄', bg:'bg-6', tag:'Ajaib', title:'Unicorn Pelangi', excerpt:'Lulu si unicorn bisa bikin pelangi keluar dari tanduknya. Tapi hari ini pelanginya hitam putih...', author:'Aira', age:7 },
   ];
 
-  // Merge with localStorage-saved stories
-  let saved = [];
-  try{
-    saved = JSON.parse(localStorage.getItem('arsyila_stories') || '[]');
-  }catch(e){ saved = []; }
-
-  const allStories = [...saved, ...sampleStories];
   const grid = document.getElementById('storiesGrid');
-  allStories.forEach(s=>{
+
+  function randomColor(){
+    const colors = ['#ffd166','#ef476f','#06d6a0','#a0c4ff','#caffbf','#ffafcc'];
+    return colors[Math.floor(Math.random()*colors.length)];
+  }
+
+  function formatDate(ts){
+    if(!ts) return 'baru saja';
+    try {
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleDateString('id-ID', {day:'numeric', month:'short'});
+    } catch(e) { return 'baru saja'; }
+  }
+
+  function renderStory(s){
     const card = document.createElement('article');
     card.className = 'story-card';
+    // Kalau ada drawingUrl dari Firebase, tampilkan sebagai background
+    const imageContent = s.drawingUrl
+      ? `<img src="${s.drawingUrl}" alt="" style="width:100%;height:100%;object-fit:cover;" loading="lazy">`
+      : (s.icon || '📖');
+    const imgStyle = s.drawingUrl ? 'padding:0; background:#fff;' : '';
     card.innerHTML = `
-      <div class="story-image ${s.bg || 'bg-1'}">${s.icon || '📖'}</div>
+      <div class="story-image ${s.bg || 'bg-1'}" style="${imgStyle}">${imageContent}</div>
       <div class="story-body">
         <span class="story-tag">${s.tag || 'Cerita'}</span>
         <h3 class="story-title">${s.title}</h3>
@@ -750,16 +762,59 @@
             <div class="avatar" style="background:${randomColor()};">${(s.author||'?')[0]}</div>
             <span>${s.author}${s.age?`, ${s.age} thn`:''}</span>
           </div>
-          <span>${s.date || 'baru saja'}</span>
+          <span>${s.date || formatDate(s.createdAt)}</span>
         </div>
       </div>`;
     grid.appendChild(card);
     io.observe(card);
-  });
+  }
 
-  function randomColor(){
-    const colors = ['#ffd166','#ef476f','#06d6a0','#a0c4ff','#caffbf','#ffafcc'];
-    return colors[Math.floor(Math.random()*colors.length)];
+  function renderAll(stories){
+    grid.innerHTML = '';
+    // Gabung dengan sample supaya grid tidak kosong di awal
+    const combined = [...stories, ...sampleStories];
+    combined.forEach(renderStory);
+  }
+
+  // Coba load dari Firebase dulu; kalau gagal atau demo mode → localStorage
+  (async function loadStories(){
+    try {
+      const { firebaseConfig, DEMO_MODE } = await import('./firebase-config.js');
+      if (!DEMO_MODE) {
+        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+        const { getFirestore, collection, query, where, orderBy, onSnapshot, limit }
+          = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Real-time: cerita approved, terbaru dulu
+        const q = query(
+          collection(db, 'stories'),
+          where('approved', '==', true),
+          orderBy('createdAt', 'desc'),
+          limit(30)
+        );
+        onSnapshot(q, (snap) => {
+          const stories = snap.docs.map(d => d.data());
+          renderAll(stories);
+        }, (err) => {
+          console.warn('Firestore listen gagal, fallback:', err);
+          fallbackLocal();
+        });
+        return;
+      }
+    } catch(e){
+      console.warn('Firebase load gagal:', e);
+    }
+    fallbackLocal();
+  })();
+
+  function fallbackLocal(){
+    let saved = [];
+    try {
+      saved = JSON.parse(localStorage.getItem('arsyila_stories') || '[]');
+    } catch(e){}
+    renderAll(saved);
   }
 </script>
 
