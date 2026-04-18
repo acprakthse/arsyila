@@ -400,6 +400,96 @@
   }
   .toast.show{bottom:30px;}
 
+  /* Edit modal specific */
+  .edit-modal-inner{
+    max-width:720px;
+  }
+  .edit-modal-inner h2{
+    font-family:'Caveat',cursive;
+    font-size:40px;
+    margin-bottom:6px;
+  }
+  .edit-modal-inner .modal-sub{
+    font-family:'Patrick Hand',cursive;
+    color:#777;
+    margin-bottom:20px;
+  }
+  .edit-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  @media (max-width:600px){.edit-grid{grid-template-columns:1fr;}}
+  .edit-field label{
+    display:block;
+    font-family:'Patrick Hand',cursive;
+    font-size:15px;
+    color:#444;
+    margin-bottom:4px;
+  }
+  .edit-field input,
+  .edit-field select,
+  .edit-field textarea{
+    width:100%;
+    font-family:'Fredoka',sans-serif;
+    font-size:15px;
+    padding:10px 14px;
+    border:2px solid var(--ink);
+    border-radius:10px;
+    background:#fff;
+  }
+  .edit-field textarea{
+    font-family:'Patrick Hand',cursive;
+    font-size:17px; line-height:1.5;
+    min-height:200px;
+    resize:vertical;
+  }
+  .edit-field input:focus,
+  .edit-field select:focus,
+  .edit-field textarea:focus{
+    outline:none;
+    box-shadow:2px 2px 0 var(--accent);
+  }
+  .edit-icon-row{
+    display:flex; gap:6px; flex-wrap:wrap;
+  }
+  .edit-icon-btn{
+    width:40px; height:40px;
+    border:2px solid var(--ink);
+    background:#fff;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:20px;
+    display:grid; place-items:center;
+  }
+  .edit-icon-btn.active{
+    background:var(--accent-2);
+    box-shadow:2px 2px 0 var(--ink);
+  }
+  .edit-actions{
+    display:flex; gap:10px; justify-content:flex-end;
+    margin-top:18px;
+    flex-wrap:wrap;
+  }
+  .edit-btn{
+    font-family:'Fredoka',sans-serif; font-weight:500;
+    font-size:15px;
+    padding:10px 20px;
+    border:2.5px solid var(--ink);
+    border-radius:24px;
+    cursor:pointer;
+    box-shadow:3px 3px 0 var(--ink);
+    transition:transform .15s ease;
+  }
+  .edit-btn:hover{transform:translate(-2px,-2px);}
+  .edit-btn.save{background:var(--accent-3); color:var(--ink);}
+  .edit-btn.cancel{background:#fff; color:var(--ink);}
+
+  /* Ensure no "Sembunyikan" button button shows wrong size */
+  .rc-btn.hide{background:var(--accent-2); color:var(--ink);}
+  .rc-btn.edit{background:var(--accent-4, #a0c4ff); color:var(--ink);}
+
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
   /* Demo mode banner */
@@ -478,15 +568,21 @@
     <div class="tabs">
       <button class="tab active" data-tab="pending">⏳ Menunggu Review <span class="count" id="tabCountPending">0</span></button>
       <button class="tab" data-tab="approved">✓ Sudah Tayang <span class="count" id="tabCountApproved">0</span></button>
+      <button class="tab" data-tab="all">📚 Semua <span class="count" id="tabCountAll">0</span></button>
     </div>
 
     <div class="stories-grid" id="storiesGrid"></div>
   </div>
 </div>
 
-<!-- Modal -->
+<!-- Modal view -->
 <div class="modal" id="storyModal">
   <div class="modal-inner" id="modalContent"></div>
+</div>
+
+<!-- Modal edit -->
+<div class="modal" id="editModal">
+  <div class="modal-inner edit-modal-inner" id="editModalContent"></div>
 </div>
 
 <div class="toast" id="toast">Berhasil!</div>
@@ -587,6 +683,10 @@
         await updateDoc(doc(db, 'stories', id), { approved: false });
         toast('Cerita disembunyikan', 'var(--accent-2)');
       };
+      window._fbEdit = async (id, updates) => {
+        await updateDoc(doc(db, 'stories', id), updates);
+        toast('Cerita berhasil diperbarui! ✨');
+      };
       window._fbDelete = async (id, drawingPath) => {
         if(!confirm('Yakin hapus cerita ini? Tindakan ini tidak bisa dibatalkan.')) return;
         try {
@@ -628,6 +728,11 @@
       save(currentStories); render();
       toast('Cerita disembunyikan', 'var(--accent-2)');
     };
+    window._fbEdit = (id, updates) => {
+      currentStories = currentStories.map(s => s.id === id ? {...s, ...updates} : s);
+      save(currentStories); render();
+      toast('Cerita berhasil diperbarui! ✨');
+    };
     window._fbDelete = (id) => {
       if(!confirm('Yakin hapus cerita ini?')) return;
       currentStories = currentStories.filter(s => s.id !== id);
@@ -659,16 +764,26 @@
     document.getElementById('countApproved').textContent = approved.length;
     document.getElementById('tabCountPending').textContent = pending.length;
     document.getElementById('tabCountApproved').textContent = approved.length;
+    document.getElementById('tabCountAll').textContent = currentStories.length;
 
-    const list = currentTab === 'pending' ? pending : approved;
+    let list;
+    if (currentTab === 'pending') list = pending;
+    else if (currentTab === 'approved') list = approved;
+    else list = currentStories;
+
     const grid = document.getElementById('storiesGrid');
 
     if (list.length === 0) {
+      const msg = {
+        pending: { icon:'🎉', title:'Semua sudah di-review!', sub:'Tidak ada cerita yang menunggu approval saat ini.' },
+        approved: { icon:'📖', title:'Belum ada cerita tayang', sub:'Cerita yang kamu approve akan muncul di sini.' },
+        all: { icon:'✨', title:'Belum ada cerita', sub:'Ajak anak untuk menulis cerita pertamanya!' }
+      }[currentTab];
       grid.innerHTML = `
         <div class="empty" style="grid-column:1/-1;">
-          <div class="empty-icon">${currentTab === 'pending' ? '🎉' : '📖'}</div>
-          <h3>${currentTab === 'pending' ? 'Semua sudah di-review!' : 'Belum ada cerita tayang'}</h3>
-          <p>${currentTab === 'pending' ? 'Tidak ada cerita yang menunggu approval saat ini.' : 'Cerita yang kamu approve akan muncul di sini.'}</p>
+          <div class="empty-icon">${msg.icon}</div>
+          <h3>${msg.title}</h3>
+          <p>${msg.sub}</p>
         </div>`;
       return;
     }
@@ -681,8 +796,20 @@
       ? `<img src="${s.drawingUrl || s.drawing}" alt="">`
       : `<span class="fallback-icon">${s.icon || '📖'}</span>`;
     const age = s.age ? `, ${s.age} thn` : '';
+    const isApproved = !!s.approved;
+
+    // Status button: show appropriate action based on current state
+    const statusBtn = isApproved
+      ? `<button class="rc-btn hide" onclick="window._fbReject('${s.id}')" title="Sembunyikan dari publik">⏸</button>`
+      : `<button class="rc-btn approve" onclick="window._fbApprove('${s.id}')" title="Setujui tayangkan">✓ Setujui</button>`;
+
+    // Open detail page button (only for approved stories)
+    const openBtn = isApproved
+      ? `<button class="rc-btn view" title="Lihat di halaman detail" onclick="window.open('cerita.html?id=${s.id}', '_blank')">🔗</button>`
+      : '';
+
     return `
-      <article class="review-card ${s.approved ? 'approved' : ''}">
+      <article class="review-card ${isApproved ? 'approved' : ''}">
         <div class="rc-image">${imageContent}</div>
         <div class="rc-body">
           <span class="rc-tag">${escapeHtml(s.tag || 'Cerita')}</span>
@@ -691,10 +818,10 @@
           <div class="rc-content">${escapeHtml(s.content || '').substring(0, 300)}${(s.content||'').length > 300 ? '...' : ''}</div>
           <div class="rc-actions">
             <button class="rc-btn view" title="Lihat lengkap" onclick="window._viewStory('${s.id}')">👁</button>
-            ${s.approved
-              ? `<button class="rc-btn reject" onclick="window._fbReject('${s.id}')">⏸ Sembunyikan</button>`
-              : `<button class="rc-btn approve" onclick="window._fbApprove('${s.id}')">✓ Setujui</button>`}
-            <button class="rc-btn delete" onclick="window._fbDelete('${s.id}','${s.drawingPath || ''}')">🗑</button>
+            <button class="rc-btn edit" title="Edit cerita" onclick="window._editStory('${s.id}')">✏️</button>
+            ${openBtn}
+            ${statusBtn}
+            <button class="rc-btn delete" title="Hapus" onclick="window._fbDelete('${s.id}','${s.drawingPath || ''}')">🗑</button>
           </div>
         </div>
       </article>`;
@@ -713,6 +840,116 @@
     `;
     document.getElementById('storyModal').classList.add('show');
   };
+
+  // ============ EDIT STORY ============
+  const TAGS = ['Petualangan','Fantasi','Dongeng','Hewan','Laut','Luar Angkasa','Keluarga','Ajaib'];
+  const ICONS = ['📖','🦕','🧚','🐉','🦄','🚀','🐙','👽','🏰','🌈','🌟','🦁','🐻','🎈','🍭'];
+  const TAG_BG = {
+    'Petualangan':'bg-1','Fantasi':'bg-2','Dongeng':'bg-3',
+    'Hewan':'bg-4','Laut':'bg-4','Luar Angkasa':'bg-5',
+    'Keluarga':'bg-6','Ajaib':'bg-5'
+  };
+
+  window._editStory = (id) => {
+    const s = currentStories.find(x => x.id === id);
+    if (!s) return;
+
+    const modal = document.getElementById('editModal');
+    document.getElementById('editModalContent').innerHTML = `
+      <h2>✏️ Edit Cerita</h2>
+      <div class="modal-sub">Perubahan di sini akan langsung terlihat di halaman utama</div>
+
+      <div class="edit-grid">
+        <div class="edit-field">
+          <label>Judul Cerita</label>
+          <input type="text" id="editTitle" value="${escapeHtml(s.title || '')}" maxlength="100" />
+        </div>
+        <div class="edit-field">
+          <label>Nama Penulis</label>
+          <input type="text" id="editAuthor" value="${escapeHtml(s.author || '')}" maxlength="50" />
+        </div>
+      </div>
+
+      <div class="edit-grid">
+        <div class="edit-field">
+          <label>Umur</label>
+          <input type="number" id="editAge" value="${s.age || ''}" min="3" max="17" />
+        </div>
+        <div class="edit-field">
+          <label>Kategori</label>
+          <select id="editTag">
+            ${TAGS.map(t => `<option value="${t}" ${t === s.tag ? 'selected' : ''}>${t}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+
+      <div class="edit-field" style="margin-bottom:14px;">
+        <label>Ikon Cerita (kalau tidak ada gambar)</label>
+        <div class="edit-icon-row" id="editIconRow">
+          ${ICONS.map(i => `<button type="button" class="edit-icon-btn ${i === s.icon ? 'active' : ''}" data-icon="${i}">${i}</button>`).join('')}
+        </div>
+      </div>
+
+      <div class="edit-field" style="margin-bottom:10px;">
+        <label>Isi Cerita</label>
+        <textarea id="editContent" maxlength="5000">${escapeHtml(s.content || '')}</textarea>
+      </div>
+
+      <div class="edit-actions">
+        <button class="edit-btn cancel" id="editCancel">Batal</button>
+        <button class="edit-btn save" id="editSave">💾 Simpan Perubahan</button>
+      </div>
+    `;
+    modal.classList.add('show');
+
+    // Icon picker
+    let selectedIcon = s.icon || '📖';
+    document.querySelectorAll('#editIconRow .edit-icon-btn').forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll('#editIconRow .edit-icon-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedIcon = btn.dataset.icon;
+      };
+    });
+
+    // Cancel
+    document.getElementById('editCancel').onclick = () => modal.classList.remove('show');
+
+    // Save
+    document.getElementById('editSave').onclick = async () => {
+      const title = document.getElementById('editTitle').value.trim();
+      const author = document.getElementById('editAuthor').value.trim();
+      const age = document.getElementById('editAge').value;
+      const tag = document.getElementById('editTag').value;
+      const content = document.getElementById('editContent').value.trim();
+
+      if (!title) { toast('Judul tidak boleh kosong', 'var(--accent)'); return; }
+      if (!author) { toast('Nama penulis tidak boleh kosong', 'var(--accent)'); return; }
+      if (!content || content.length < 20) { toast('Cerita minimal 20 huruf', 'var(--accent)'); return; }
+
+      const excerpt = content.length > 140 ? content.substring(0, 140) + '...' : content;
+      const updates = {
+        title, author, tag, content, excerpt,
+        icon: selectedIcon,
+        bg: TAG_BG[tag] || 'bg-1',
+        age: age ? Number(age) : null
+      };
+
+      const btn = document.getElementById('editSave');
+      btn.disabled = true; btn.textContent = 'Menyimpan...';
+      try {
+        await window._fbEdit(s.id, updates);
+        modal.classList.remove('show');
+      } catch(e){
+        toast('Gagal menyimpan: ' + e.message, 'var(--accent)');
+        btn.disabled = false; btn.textContent = '💾 Simpan Perubahan';
+      }
+    };
+  };
+
+  document.getElementById('editModal').addEventListener('click', (e)=>{
+    if (e.target.id === 'editModal') e.currentTarget.classList.remove('show');
+  });
 
   document.getElementById('storyModal').addEventListener('click', (e)=>{
     if (e.target.id === 'storyModal') e.currentTarget.classList.remove('show');

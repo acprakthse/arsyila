@@ -339,6 +339,7 @@
     display:flex; flex-direction:column;
     opacity:0; transform:translateY(40px);
     transition:transform .6s cubic-bezier(.34,1.56,.64,1), opacity .6s ease, box-shadow .2s ease;
+    position:relative;
   }
   .story-card.in{opacity:1; transform:translateY(0);}
   .story-card:hover{
@@ -348,6 +349,17 @@
   .story-card:nth-child(even){transform:rotate(1deg);}
   .story-card:nth-child(even).in{transform:rotate(1deg) translateY(0);}
   .story-card:nth-child(even):hover{transform:translateY(-6px) rotate(2deg);}
+  .read-more{
+    margin-top:10px;
+    padding-top:10px;
+    border-top:2px dashed #ddd;
+    font-family:'Patrick Hand', cursive;
+    font-size:15px;
+    color:var(--accent);
+    font-weight:600;
+    transition:letter-spacing .2s ease;
+  }
+  .story-card:hover .read-more{letter-spacing:1px;}
 
   .story-image{
     height:180px;
@@ -495,7 +507,7 @@
       <span class="word-1">Petualangan</span>
       <span class="word-2">Arsyila</span>
     </h1>
-    <div class="hero-sub">Tempat Arsyila menceritakan pengalaman dan imajinasinya, silahkan mengikuti ya teman 🎨</div>
+    <div class="hero-sub">Tempat seru untuk anak-anak menuangkan imajinasi lewat tulisan & gambar 🎨</div>
     <div class="hero-cta">
       <a href="tulis.html" class="btn-big primary">✏️ Mulai Menulis</a>
       <a href="#scene-stories" class="btn-big secondary">📖 Baca Cerita</a>
@@ -654,8 +666,8 @@
 <!-- STORIES BLOG SECTION -->
 <section class="scene" id="scene-stories" style="min-height:auto;">
   <div class="stories-header">
-    <h2>Cerita dari <span>Teman-Teman</span> ✨</h2>
-    <p>Imajinasi tanpa batas dari para petualang kecil</p>
+    <h2>Cerita <span>Arsyila</span> ✨</h2>
+    <p>Imajinasi tanpa batas dari petualang kecil kita</p>
   </div>
 
   <div class="stories-grid" id="storiesGrid">
@@ -720,12 +732,12 @@
 
   // ========== Blog stories — Firebase + fallback ==========
   const sampleStories = [
-    { icon:'🦕', bg:'bg-1', tag:'Petualangan', title:'Dino yang Suka Kue', excerpt:'Di suatu hari yang cerah, Rex si dinosaurus kecil menemukan toko kue rahasia di tengah hutan...', author:'Nadia', age:8 },
-    { icon:'🧚', bg:'bg-2', tag:'Fantasi', title:'Peri Bulan', excerpt:'Setiap malam, Peri Bulan turun ke taman untuk menyiram bunga-bunga dengan cahaya perak...', author:'Raffi', age:9 },
-    { icon:'🐉', bg:'bg-3', tag:'Dongeng', title:'Naga Pemalu', excerpt:'Naga kecil bernama Api tidak suka meniupkan api. Dia lebih suka menghangatkan cokelat panas...', author:'Sasha', age:7 },
-    { icon:'🐙', bg:'bg-4', tag:'Laut', title:'Gurita 8 Teman', excerpt:'Ollie si gurita punya 8 tangan tapi belum punya teman. Hari ini dia mau cari 8 teman baru!', author:'Bima', age:8 },
-    { icon:'👽', bg:'bg-5', tag:'Luar Angkasa', title:'Tamu dari Mars', excerpt:'Zorp dari Mars nyasar ke Bumi. Dia bingung kenapa manusia punya dua mata, dia punya empat...', author:'Lila', age:10 },
-    { icon:'🦄', bg:'bg-6', tag:'Ajaib', title:'Unicorn Pelangi', excerpt:'Lulu si unicorn bisa bikin pelangi keluar dari tanduknya. Tapi hari ini pelanginya hitam putih...', author:'Aira', age:7 },
+    { id:'sample_1', icon:'🦕', bg:'bg-1', tag:'Petualangan', title:'Dino yang Suka Kue', excerpt:'Di suatu hari yang cerah, Rex si dinosaurus kecil menemukan toko kue rahasia di tengah hutan...', content:'Di suatu hari yang cerah, Rex si dinosaurus kecil sedang berjalan-jalan di hutan. Tiba-tiba dia mencium bau yang sangat enak!\n\nRex mengikuti bau itu sampai ke sebuah pohon besar. Di balik pohon itu, ada toko kue rahasia yang dijaga oleh tupai-tupai kecil.\n\n"Wah, aku mau kue cokelat!" kata Rex dengan gembira. Tapi Rex terlalu besar untuk masuk ke toko. Akhirnya tupai-tupai itu membawakan kue keluar untuk Rex.\n\nRex sangat senang. Sejak hari itu, Rex selalu membawa teman-teman dinosaurusnya ke toko kue rahasia. Mereka hidup bahagia dan kenyang selamanya!', author:'Nadia', age:8 },
+    { id:'sample_2', icon:'🧚', bg:'bg-2', tag:'Fantasi', title:'Peri Bulan', excerpt:'Setiap malam, Peri Bulan turun ke taman untuk menyiram bunga-bunga dengan cahaya perak...', content:'Setiap malam saat bulan purnama, Peri Bulan turun ke taman. Sayapnya berkilau seperti perak.\n\nDia punya satu tugas khusus: menyiram bunga-bunga dengan cahaya bulan. Bunga yang disiram cahaya bulan akan mekar warna-warni yang tidak bisa dilihat di siang hari.\n\nSuatu malam, seorang anak kecil bernama Mira melihat Peri Bulan. Peri Bulan kaget, tapi Mira tidak takut. Mira malah memberi Peri Bulan sepotong kue.\n\nSejak itu mereka berteman. Setiap malam purnama, Mira menunggu Peri Bulan di taman dengan membawa kue.', author:'Raffi', age:9 },
+    { id:'sample_3', icon:'🐉', bg:'bg-3', tag:'Dongeng', title:'Naga Pemalu', excerpt:'Naga kecil bernama Api tidak suka meniupkan api. Dia lebih suka menghangatkan cokelat panas...', content:'Ada seekor naga kecil bernama Api. Tapi Api tidak seperti naga lainnya. Dia malu meniupkan api ke mana-mana.\n\nTeman-temannya suka membakar batu, membakar pohon, tapi Api tidak suka merusak. Dia lebih suka menggunakan apinya untuk hal yang baik.\n\nSuatu hari ada anak-anak kedinginan di hutan. Api datang dan meniup lembut ke cangkir cokelat mereka. Cokelatnya jadi hangat dan enak!\n\nSejak itu Api jadi naga paling disayangi anak-anak desa. Dia tidak pemalu lagi — dia menemukan kehebatannya sendiri.', author:'Sasha', age:7 },
+    { id:'sample_4', icon:'🐙', bg:'bg-4', tag:'Laut', title:'Gurita 8 Teman', excerpt:'Ollie si gurita punya 8 tangan tapi belum punya teman. Hari ini dia mau cari 8 teman baru!', content:'Ollie si gurita punya 8 tangan, tapi tidak punya satu pun teman. Dia merasa kesepian di dasar laut.\n\n"Hari ini aku harus cari teman!" kata Ollie semangat. Dengan tangan pertama dia menjabat ikan badut yang ramah. Dengan tangan kedua, dia bersalaman dengan kuda laut.\n\nTangan ketiga sampai tangan ketujuh juga menemukan teman: bintang laut, kura-kura, lumba-lumba, ikan pari, dan udang.\n\nTangan kedelapan? Dia pakai untuk memeluk semuanya sekaligus! Sekarang Ollie punya 8 teman — satu untuk setiap tangan!', author:'Bima', age:8 },
+    { id:'sample_5', icon:'👽', bg:'bg-5', tag:'Luar Angkasa', title:'Tamu dari Mars', excerpt:'Zorp dari Mars nyasar ke Bumi. Dia bingung kenapa manusia punya dua mata, dia punya empat...', content:'Zorp adalah alien kecil dari planet Mars. Pesawatnya rusak dan mendarat di halaman rumah Luna.\n\nZorp bingung melihat Luna. "Kenapa kamu cuma punya dua mata? Di Mars, semua orang punya empat mata!" Luna tertawa. "Kenapa kamu hijau? Manusia tidak ada yang hijau!"\n\nMereka tukar cerita tentang planet masing-masing. Zorp cerita tentang kebun kaktus raksasa di Mars. Luna cerita tentang hujan dan pelangi.\n\nSebelum pesawatnya selesai diperbaiki, Zorp berjanji akan kembali. Luna menunggu di halaman rumah setiap malam, melihat langit.', author:'Lila', age:10 },
+    { id:'sample_6', icon:'🦄', bg:'bg-6', tag:'Ajaib', title:'Unicorn Pelangi', excerpt:'Lulu si unicorn bisa bikin pelangi keluar dari tanduknya. Tapi hari ini pelanginya hitam putih...', content:'Lulu si unicorn terkenal karena bisa bikin pelangi keluar dari tanduknya. Tapi pagi ini ada yang aneh — pelanginya jadi hitam putih!\n\nLulu sedih sekali. Dia bertanya ke Nenek Unicorn kenapa ini terjadi. Nenek menjawab, "Pelangimu hitam putih karena hatimu sedang sedih. Coba ingat-ingat, apa yang bikin kamu sedih?"\n\nLulu ingat tadi pagi dia bertengkar dengan sahabatnya, Poni. Dia pergi mencari Poni dan minta maaf. Mereka peluk-pelukan.\n\nTiba-tiba tanduk Lulu menyala terang! Pelanginya kembali warna-warni. Ternyata pelangi unicorn datangnya dari hati yang gembira.', author:'Aira', age:7 },
   ];
 
   const grid = document.getElementById('storiesGrid');
@@ -751,6 +763,7 @@
       ? `<img src="${s.drawingUrl}" alt="" style="width:100%;height:100%;object-fit:cover;" loading="lazy">`
       : (s.icon || '📖');
     const imgStyle = s.drawingUrl ? 'padding:0; background:#fff;' : '';
+    const storyId = s.id || s._localId || '';
     card.innerHTML = `
       <div class="story-image ${s.bg || 'bg-1'}" style="${imgStyle}">${imageContent}</div>
       <div class="story-body">
@@ -764,7 +777,18 @@
           </div>
           <span>${s.date || formatDate(s.createdAt)}</span>
         </div>
+        <div class="read-more">Baca cerita →</div>
       </div>`;
+    card.addEventListener('click', ()=>{
+      if(storyId){
+        window.location.href = `cerita.html?id=${encodeURIComponent(storyId)}`;
+      } else {
+        // Sample stories — simpan ke sessionStorage dan buka via local ID
+        const sampleId = 'sample_' + btoa(encodeURIComponent(s.title)).substring(0,12);
+        sessionStorage.setItem('arsyila_sample_' + sampleId, JSON.stringify({...s, id: sampleId}));
+        window.location.href = `cerita.html?id=${sampleId}&type=sample`;
+      }
+    });
     grid.appendChild(card);
     io.observe(card);
   }

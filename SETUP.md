@@ -7,8 +7,9 @@ Panduan ini menjelaskan cara setup Firebase dan deploy website ke GitHub Pages.
 ```
 petualangan-arsyila/
 ├── index.html          ← Halaman utama (blog + animasi scroll)
+├── cerita.html         ← Halaman detail cerita (buka saat card diklik)
 ├── tulis.html          ← Halaman input cerita anak
-├── admin.html          ← Panel orang tua untuk review cerita
+├── admin.html          ← Panel orang tua untuk manage cerita
 ├── firebase-config.js  ← Konfigurasi Firebase (edit file ini!)
 ├── FIREBASE_RULES.md   ← Rules keamanan untuk Firebase
 └── SETUP.md            ← Panduan ini
@@ -91,17 +92,23 @@ Website live di: `https://USERNAME.github.io/petualangan-arsyila/`
 ## 🎯 Cara Pakai Website
 
 ### Untuk Anak-anak:
-1. Buka `index.html` — lihat animasi scroll, baca cerita teman-teman
-2. Klik tombol **✏️ Tulis Cerita** di nav
-3. Isi nama, judul, kategori → tulis cerita → gambar di canvas
-4. Klik **🚀 Terbitkan Ceritaku!** — cerita akan menunggu review orang tua
+1. Buka `index.html` — lihat animasi scroll, baca cerita Arsyila
+2. **Klik card cerita** untuk buka halaman detail (`cerita.html`) dengan gambar besar & cerita lengkap
+3. Di halaman detail ada tombol emoji reaction (❤️ 😂 🤩 👏 🌟) untuk kasih apresiasi
+4. Klik tombol **✏️ Tulis Cerita** di nav untuk buat cerita baru
+5. Isi nama, judul, kategori → tulis cerita → gambar di canvas
+6. Klik **🚀 Terbitkan Ceritaku!** — cerita menunggu review orang tua
 
-### Untuk Orang Tua:
-1. Buka `admin.html` (bisa tambah bookmark)
-2. Login dengan email/password yang dibuat di Langkah 2C
-3. Tab **⏳ Menunggu Review** — lihat semua cerita baru
-4. Klik 👁 untuk baca full, **✓ Setujui** untuk tayang, atau 🗑 untuk hapus
-5. Cerita yang disetujui langsung muncul di `index.html`
+### Untuk Orang Tua (admin.html):
+1. Buka `admin.html` → login dengan email/password dari Firebase
+2. Ada 3 tab: **⏳ Menunggu Review**, **✓ Sudah Tayang**, **📚 Semua**
+3. Tombol aksi per card:
+   - 👁 — preview cerita di modal
+   - ✏️ — edit lengkap (judul, nama, umur, kategori, ikon, isi cerita)
+   - 🔗 — buka halaman detail di tab baru (hanya untuk yang sudah tayang)
+   - ✓ Setujui / ⏸ Sembunyikan — toggle visibility
+   - 🗑 — hapus permanen (termasuk gambar di Storage)
+4. Semua perubahan real-time ke halaman utama — tidak perlu refresh manual
 
 ---
 
