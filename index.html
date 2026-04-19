@@ -799,24 +799,29 @@
     try {
       const { firebaseConfig, DEMO_MODE } = await import('./firebase-config.js');
       if (!DEMO_MODE) {
-        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-        const { getFirestore, collection, query, where, orderBy, onSnapshot, limit }
+        const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+        const { getFirestore, collection, query, where, onSnapshot, limit }
           = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-        const app = initializeApp(firebaseConfig);
+        const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Real-time: cerita approved, terbaru dulu
+        // Query tanpa orderBy untuk menghindari kebutuhan composite index
         const q = query(
           collection(db, 'stories'),
           where('approved', '==', true),
-          orderBy('createdAt', 'desc'),
           limit(30)
         );
         onSnapshot(q, (snap) => {
-          const stories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          const stories = snap.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => {
+              const ta = a.createdAt?.toMillis?.() ?? a.createdAt ?? 0;
+              const tb = b.createdAt?.toMillis?.() ?? b.createdAt ?? 0;
+              return tb - ta;
+            });
           renderAll(stories);
         }, (err) => {
-          console.warn('Firestore listen gagal:', err);
+          console.error('Firestore listen gagal:', err);
           renderAll([]);
         });
         return;
