@@ -730,15 +730,7 @@
     }
   }
 
-  // ========== Blog stories — Firebase + fallback ==========
-  const sampleStories = [
-    { id:'sample_1', icon:'🦕', bg:'bg-1', tag:'Petualangan', title:'Dino yang Suka Kue', excerpt:'Di suatu hari yang cerah, Rex si dinosaurus kecil menemukan toko kue rahasia di tengah hutan...', content:'Di suatu hari yang cerah, Rex si dinosaurus kecil sedang berjalan-jalan di hutan. Tiba-tiba dia mencium bau yang sangat enak!\n\nRex mengikuti bau itu sampai ke sebuah pohon besar. Di balik pohon itu, ada toko kue rahasia yang dijaga oleh tupai-tupai kecil.\n\n"Wah, aku mau kue cokelat!" kata Rex dengan gembira. Tapi Rex terlalu besar untuk masuk ke toko. Akhirnya tupai-tupai itu membawakan kue keluar untuk Rex.\n\nRex sangat senang. Sejak hari itu, Rex selalu membawa teman-teman dinosaurusnya ke toko kue rahasia. Mereka hidup bahagia dan kenyang selamanya!', author:'Nadia', age:8 },
-    { id:'sample_2', icon:'🧚', bg:'bg-2', tag:'Fantasi', title:'Peri Bulan', excerpt:'Setiap malam, Peri Bulan turun ke taman untuk menyiram bunga-bunga dengan cahaya perak...', content:'Setiap malam saat bulan purnama, Peri Bulan turun ke taman. Sayapnya berkilau seperti perak.\n\nDia punya satu tugas khusus: menyiram bunga-bunga dengan cahaya bulan. Bunga yang disiram cahaya bulan akan mekar warna-warni yang tidak bisa dilihat di siang hari.\n\nSuatu malam, seorang anak kecil bernama Mira melihat Peri Bulan. Peri Bulan kaget, tapi Mira tidak takut. Mira malah memberi Peri Bulan sepotong kue.\n\nSejak itu mereka berteman. Setiap malam purnama, Mira menunggu Peri Bulan di taman dengan membawa kue.', author:'Raffi', age:9 },
-    { id:'sample_3', icon:'🐉', bg:'bg-3', tag:'Dongeng', title:'Naga Pemalu', excerpt:'Naga kecil bernama Api tidak suka meniupkan api. Dia lebih suka menghangatkan cokelat panas...', content:'Ada seekor naga kecil bernama Api. Tapi Api tidak seperti naga lainnya. Dia malu meniupkan api ke mana-mana.\n\nTeman-temannya suka membakar batu, membakar pohon, tapi Api tidak suka merusak. Dia lebih suka menggunakan apinya untuk hal yang baik.\n\nSuatu hari ada anak-anak kedinginan di hutan. Api datang dan meniup lembut ke cangkir cokelat mereka. Cokelatnya jadi hangat dan enak!\n\nSejak itu Api jadi naga paling disayangi anak-anak desa. Dia tidak pemalu lagi — dia menemukan kehebatannya sendiri.', author:'Sasha', age:7 },
-    { id:'sample_4', icon:'🐙', bg:'bg-4', tag:'Laut', title:'Gurita 8 Teman', excerpt:'Ollie si gurita punya 8 tangan tapi belum punya teman. Hari ini dia mau cari 8 teman baru!', content:'Ollie si gurita punya 8 tangan, tapi tidak punya satu pun teman. Dia merasa kesepian di dasar laut.\n\n"Hari ini aku harus cari teman!" kata Ollie semangat. Dengan tangan pertama dia menjabat ikan badut yang ramah. Dengan tangan kedua, dia bersalaman dengan kuda laut.\n\nTangan ketiga sampai tangan ketujuh juga menemukan teman: bintang laut, kura-kura, lumba-lumba, ikan pari, dan udang.\n\nTangan kedelapan? Dia pakai untuk memeluk semuanya sekaligus! Sekarang Ollie punya 8 teman — satu untuk setiap tangan!', author:'Bima', age:8 },
-    { id:'sample_5', icon:'👽', bg:'bg-5', tag:'Luar Angkasa', title:'Tamu dari Mars', excerpt:'Zorp dari Mars nyasar ke Bumi. Dia bingung kenapa manusia punya dua mata, dia punya empat...', content:'Zorp adalah alien kecil dari planet Mars. Pesawatnya rusak dan mendarat di halaman rumah Luna.\n\nZorp bingung melihat Luna. "Kenapa kamu cuma punya dua mata? Di Mars, semua orang punya empat mata!" Luna tertawa. "Kenapa kamu hijau? Manusia tidak ada yang hijau!"\n\nMereka tukar cerita tentang planet masing-masing. Zorp cerita tentang kebun kaktus raksasa di Mars. Luna cerita tentang hujan dan pelangi.\n\nSebelum pesawatnya selesai diperbaiki, Zorp berjanji akan kembali. Luna menunggu di halaman rumah setiap malam, melihat langit.', author:'Lila', age:10 },
-    { id:'sample_6', icon:'🦄', bg:'bg-6', tag:'Ajaib', title:'Unicorn Pelangi', excerpt:'Lulu si unicorn bisa bikin pelangi keluar dari tanduknya. Tapi hari ini pelanginya hitam putih...', content:'Lulu si unicorn terkenal karena bisa bikin pelangi keluar dari tanduknya. Tapi pagi ini ada yang aneh — pelanginya jadi hitam putih!\n\nLulu sedih sekali. Dia bertanya ke Nenek Unicorn kenapa ini terjadi. Nenek menjawab, "Pelangimu hitam putih karena hatimu sedang sedih. Coba ingat-ingat, apa yang bikin kamu sedih?"\n\nLulu ingat tadi pagi dia bertengkar dengan sahabatnya, Poni. Dia pergi mencari Poni dan minta maaf. Mereka peluk-pelukan.\n\nTiba-tiba tanduk Lulu menyala terang! Pelanginya kembali warna-warni. Ternyata pelangi unicorn datangnya dari hati yang gembira.', author:'Aira', age:7 },
-  ];
+  // ========== Blog stories — Firebase ==========
 
   const grid = document.getElementById('storiesGrid');
 
@@ -795,9 +787,11 @@
 
   function renderAll(stories){
     grid.innerHTML = '';
-    // Gabung dengan sample supaya grid tidak kosong di awal
-    const combined = [...stories, ...sampleStories];
-    combined.forEach(renderStory);
+    if(stories.length === 0){
+      grid.innerHTML = '<p style="text-align:center;opacity:.6;grid-column:1/-1;padding:40px 0;">Belum ada cerita. Jadilah yang pertama! ✨</p>';
+      return;
+    }
+    stories.forEach(renderStory);
   }
 
   // Coba load dari Firebase dulu; kalau gagal atau demo mode → localStorage
@@ -819,27 +813,19 @@
           limit(30)
         );
         onSnapshot(q, (snap) => {
-          const stories = snap.docs.map(d => d.data());
+          const stories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           renderAll(stories);
         }, (err) => {
-          console.warn('Firestore listen gagal, fallback:', err);
-          fallbackLocal();
+          console.warn('Firestore listen gagal:', err);
+          renderAll([]);
         });
         return;
       }
     } catch(e){
       console.warn('Firebase load gagal:', e);
     }
-    fallbackLocal();
+    renderAll([]);
   })();
-
-  function fallbackLocal(){
-    let saved = [];
-    try {
-      saved = JSON.parse(localStorage.getItem('arsyila_stories') || '[]');
-    } catch(e){}
-    renderAll(saved);
-  }
 </script>
 
 </body>
